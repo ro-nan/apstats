@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Color study</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="config.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <h1>Color study</h1>
+    </header>
+
+      <section class="experiment" aria-live="polite">
+        <div class="trial-header">
+            <h5 class="eyebrow">Please adjust the slider to find the best fitting color for the shape; whatever looks the best.</h5>
+            <div class="progress-chip" id="progress-chip">1 / 18</div>
+        </div>
+
+        <div class="preview-panel panel">
+          <div id="svg-host" class="svg-host" aria-label="Stimulus preview" role="img"></div>
+        </div>
+
+        <label class="control" aria-label="Response slider">
+          <input id="temperature-slider" type="range" min="2000" max="10000" step="50" value="4500" />
+        </label>
+
+        <div class="actions">
+          <button type="button" id="prev-button">Back</button>
+          <button type="button" class="primary" id="next-button">Next</button>
+        </div>
+      </section>
+
+      <section class="results-panel hidden" id="results-panel">
+        <div class="trial-header">
+          <div>
+            <p class="eyebrow">Done</p>
+            <h2>Thanks for completing the survey.</h2>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
