@@ -57,9 +57,11 @@ input {
 }
 
 h5.eyebrow{
-    color: var(--muted);
-    text-transform: none;
-    padding: 1%;
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0.05em;
+  font-size: 0.95rem;
+  padding: 0.75%;
 }
 
 h1,
@@ -89,12 +91,12 @@ h2 {
   justify-content: space-between;
   gap: 16px;
   align-items: start;
-  margin-bottom: 12px;
+  margin-bottom: 0px;
 }
 
 .progress-chip {
-  padding: 6px 10px;
-  border-radius: 999px;
+  padding: 10px 24px;
+  border-radius: 10px 10px 0px 0px;
   background: #55ff0077;
   color: var(--accent);
   font-weight: 700;
@@ -105,9 +107,18 @@ h2 {
   justify-items: center;
   padding: 12px;
   margin-bottom: 14px;
-  border: 1px solid var(--border);
+  border: 1px transparent var(--border);
   border-radius: 4px;
   background: #fafafa;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+}
+
+path {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .svg-host {
@@ -187,5 +198,11 @@ button.primary:hover {
 
   .actions button {
     width: 100%;
+  }
+}
+
+@media (max-width: 924px) {
+  .trial-header {
+    flex-direction: column;
   }
 }
