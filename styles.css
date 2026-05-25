@@ -95,8 +95,8 @@ h2 {
 }
 
 .progress-chip {
-  padding: 10px 24px;
-  border-radius: 10px 10px 0px 0px;
+  padding: 10px 12px;
+  border-radius: 10px 10px 10px 10px;
   background: #55ff0077;
   color: var(--accent);
   font-weight: 700;
