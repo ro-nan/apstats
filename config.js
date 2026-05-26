@@ -1,3 +1,3 @@
 window.EXPERIMENT_CONFIG = {
-  submissionEndpoint: "https://script.google.com/macros/s/AKfycbzcRYWU5nJwh6HmIYoY3xNNbzwGAMc6hQK44cqJMjrwYKY3Gq79kanMHTEzs2_WpglW/exec",
+  submissionEndpoint: "https://script.google.com/macros/s/AKfycbxxBD38R7SkfqlSGgx2foK4Fux8ACR9pqjQoLuG7YgpfaqJFPpMmIAz8Ej8m8BkMKO_/exec",
 };

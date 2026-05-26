@@ -115,12 +115,6 @@ h2 {
   justify-content: center;
 }
 
-path {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .svg-host {
   width: min(100%, 460px);
   display: grid;
