@@ -16,17 +16,39 @@
 
       <section class="experiment" aria-live="polite">
         <div class="trial-header">
-            <h5 class="eyebrow">Adjust the slider and find the best looking shape-color combination. When you are satisfied with your choice, select "Next."</h5>
-            <div class="progress-chip" id="progress-chip">1 / 18</div>
+            <h5 class="eyebrow">First, choose the color that best matches each shape. Then complete the slider section for the shape-color combinations.</h5>
+            <div class="progress-chip" id="progress-chip">1 / 28</div>
         </div>
 
         <div class="preview-panel panel">
           <div id="svg-host" class="svg-host" aria-label="Stimulus preview" role="img"></div>
         </div>
 
-        <label class="control" aria-label="Response slider">
-          <input id="temperature-slider" type="range" min="2000" max="10000" step="50" value="4500" />
-        </label>
+        <div id="question-text" class="eyebrow">Choose the color that best matches this shape.</div>
+
+        <div id="slider-panel" class="control">
+          <label class="control" aria-label="Response slider">
+            <input id="temperature-slider" type="range" min="2000" max="10000" step="50" value="4500" />
+          </label>
+        </div>
+
+        <div id="categorical-panel" class="control hidden">
+          <label for="color-select">Which color matches this shape?</label>
+          <select id="color-select" aria-label="Color choice">
+            <option value="">Select a color</option>
+            <option value="red">Red</option>
+            <option value="orange">Orange</option>
+            <option value="yellow">Yellow</option>
+            <option value="green">Green</option>
+            <option value="blue">Blue</option>
+            <option value="purple">Purple</option>
+            <option value="pink">Pink</option>
+            <option value="black">Black</option>
+            <option value="white">White</option>
+            <option value="brown">Brown</option>
+            <option value="gray">Gray</option>
+          </select>
+        </div>
 
         <div class="actions">
           <button type="button" id="prev-button">Back</button>

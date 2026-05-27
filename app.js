@@ -55,6 +55,25 @@ function paintTemperatureToRgb(temperature) {
   return oklchToSrgb(lightness, chroma, hue);
 }
 
+const colorCategories = [
+  "red",
+  "orange",
+  "yellow",
+  "green",
+  "blue",
+  "purple",
+  "pink",
+  "black",
+  "white",
+  "brown",
+  "gray",
+];
+
+function getRandomGrayColor() {
+  const level = 110 + Math.floor(Math.random() * 80);
+  return { r: level, g: level, b: level };
+}
+
 const shapeGroups = {
   spiky: {
     key: "spiky",
@@ -115,6 +134,10 @@ const shapeGroups = {
 const elements = {
   progressChip: document.getElementById("progress-chip"),
   svgHost: document.getElementById("svg-host"),
+  questionText: document.getElementById("question-text"),
+  sliderPanel: document.getElementById("slider-panel"),
+  categoricalPanel: document.getElementById("categorical-panel"),
+  colorSelect: document.getElementById("color-select"),
   temperatureSlider: document.getElementById("temperature-slider"),
   prevButton: document.getElementById("prev-button"),
   nextButton: document.getElementById("next-button"),
@@ -142,18 +165,36 @@ function shuffleArray(array) {
 
 function buildTrials() {
   const shapeGroupsInUse = Object.values(shapeGroups).filter((shapeGroup) => shapeGroup.svgs.length > 0);
-  const trials = [];
+  const categoricalTrials = [];
+  const temperatureTrials = [];
   const defaultTemperature = 4500;
 
   for (const shapeGroup of shapeGroupsInUse) {
     const shuffledSvgs = shuffleArray(shapeGroup.svgs);
-    const selectedSvgs = shuffledSvgs.slice(0, 3);
+    const selectedSvgs = shuffledSvgs.slice(0, colorCategories.length);
 
     selectedSvgs.forEach((svgMarkup, index) => {
-      trials.push({
-        id: `${shapeGroup.key}-${index}`,
+      const targetColor = colorCategories[index];
+      categoricalTrials.push({
+        id: `${shapeGroup.key}-categorical-${targetColor}`,
         shapeKey: shapeGroup.key,
         shapeLabel: shapeGroup.label,
+        questionType: "categorical",
+        targetColor,
+        selectedColor: null,
+        temperature: null,
+        renderColor: getRandomGrayColor(),
+        svgMarkup,
+      });
+    });
+
+    const temperatureSvgs = shuffleArray(shapeGroup.svgs).slice(0, 3);
+    temperatureSvgs.forEach((svgMarkup, index) => {
+      temperatureTrials.push({
+        id: `${shapeGroup.key}-temperature-${index}`,
+        shapeKey: shapeGroup.key,
+        shapeLabel: shapeGroup.label,
+        questionType: "temperature",
         temperature: defaultTemperature,
         renderColor: paintTemperatureToRgb(defaultTemperature),
         svgMarkup,
@@ -161,7 +202,7 @@ function buildTrials() {
     });
   }
 
-  return shuffleArray(trials);
+  return [...shuffleArray(categoricalTrials), ...shuffleArray(temperatureTrials)];
 }
 
 function isCanvasPath(element) {
@@ -232,28 +273,55 @@ function renderSvg(trial) {
 
 function updateTrialView() {
   const trial = getCurrentTrial();
-  const currentTemperature = Number(experiment.responses[experiment.currentIndex] ?? trial.temperature);
-  trial.temperature = currentTemperature;
-  trial.renderColor = paintTemperatureToRgb(currentTemperature);
+  const response = experiment.responses[experiment.currentIndex];
+  const currentTemperature = trial.questionType === "temperature" ? Number(response ?? trial.temperature) : trial.temperature;
+
+  if (trial.questionType === "temperature") {
+    trial.temperature = currentTemperature;
+    trial.renderColor = paintTemperatureToRgb(currentTemperature);
+  }
 
   elements.progressChip.textContent = `${experiment.currentIndex + 1} / ${experiment.trials.length}`;
-  elements.temperatureSlider.value = String(currentTemperature);
   elements.prevButton.disabled = experiment.currentIndex === 0;
   elements.nextButton.textContent = experiment.currentIndex === experiment.trials.length - 1 ? "Finish" : "Next";
+
+  if (trial.questionType === "categorical") {
+    elements.questionText.textContent = `Which color best matches this shape?`;
+    elements.categoricalPanel.classList.remove("hidden");
+    elements.sliderPanel.classList.add("hidden");
+    elements.colorSelect.value = experiment.responses[experiment.currentIndex] ?? "";
+    elements.nextButton.disabled = !elements.colorSelect.value;
+  } else {
+    elements.questionText.textContent = "Adjust the slider and find the best looking shape-color combination.";
+    elements.categoricalPanel.classList.add("hidden");
+    elements.sliderPanel.classList.remove("hidden");
+    elements.temperatureSlider.value = String(currentTemperature);
+    elements.nextButton.disabled = false;
+  }
 
   renderSvg(trial);
 }
 
 function saveCurrentResponse() {
   const trial = getCurrentTrial();
-  const response = Number(elements.temperatureSlider.value);
-  trial.temperature = response;
-  trial.renderColor = paintTemperatureToRgb(response);
-  experiment.responses[experiment.currentIndex] = response;
+
+  if (trial.questionType === "categorical") {
+    const response = elements.colorSelect.value || null;
+    trial.selectedColor = response;
+    experiment.responses[experiment.currentIndex] = response;
+  } else {
+    const response = Number(elements.temperatureSlider.value);
+    trial.temperature = response;
+    trial.renderColor = paintTemperatureToRgb(response);
+    experiment.responses[experiment.currentIndex] = response;
+  }
 
   const svgElement = elements.svgHost.querySelector("svg");
   if (svgElement) {
-    colorizeSvg(svgElement, `rgb(${trial.renderColor.r}, ${trial.renderColor.g}, ${trial.renderColor.b})`);
+    const color = trial.questionType === "categorical"
+      ? `rgb(${trial.renderColor.r}, ${trial.renderColor.g}, ${trial.renderColor.b})`
+      : `rgb(${trial.renderColor.r}, ${trial.renderColor.g}, ${trial.renderColor.b})`;
+    colorizeSvg(svgElement, color);
   }
 }
 
@@ -290,9 +358,12 @@ function showResults() {
 function buildSubmissionPayload() {
   const responses = experiment.trials.map((trial, index) => ({
     trial: index + 1,
-    shape: trial.shapeLabel,
-    colorModel: appConfig.colorModel,
-    temperature: experiment.responses[index],
+    shapeKey: trial.shapeKey,
+    shapeLabel: trial.shapeLabel,
+    questionType: trial.questionType,
+    targetColor: trial.targetColor ?? null,
+    selectedColor: trial.questionType === "categorical" ? experiment.responses[index] : null,
+    temperature: trial.questionType === "temperature" ? experiment.responses[index] : null,
   }));
 
   return {
@@ -300,7 +371,7 @@ function buildSubmissionPayload() {
     studyVersion: appConfig.studyVersion,
     colorModel: appConfig.colorModel,
     submittedAt: experiment.finishedAt || new Date().toISOString(),
-    shapeGroup: Array.from(new Set(experiment.trials.map((t) => t.shapeKey))).join(','),
+    shapeGroup: Array.from(new Set(experiment.trials.map((t) => t.shapeKey))).join(', '),
     participantId: experiment.participantId,
     responses,
   };
@@ -314,9 +385,13 @@ elements.temperatureSlider.addEventListener("input", () => {
   trial.renderColor = paintTemperatureToRgb(value);
 
   const svgElement = elements.svgHost.querySelector("svg");
-    if (svgElement) {
+  if (svgElement) {
     colorizeSvg(svgElement, `rgb(${trial.renderColor.r}, ${trial.renderColor.g}, ${trial.renderColor.b})`);
   }
+});
+
+elements.colorSelect.addEventListener("change", () => {
+  elements.nextButton.disabled = !elements.colorSelect.value;
 });
 
 elements.prevButton.addEventListener("click", () => {
